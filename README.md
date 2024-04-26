@@ -1,5 +1,5 @@
 # MDPCalib
-[**arXiv**](https://arxiv.org) | [**Website**](http://calibration.cs.uni-freiburg.de/) | [**Video**](https://www.youtube.com/)
+[**arXiv**](https://arxiv.org) | [**Website**](http://calibration.cs.uni-freiburg.de/) | [**Video**](https://youtu.be/L1MwAenzd6g)
 
 This repository is the official implementation of the paper:
 
