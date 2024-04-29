@@ -1,5 +1,5 @@
 # MDPCalib
-[**arXiv**](https://arxiv.org) | [**Website**](http://calibration.cs.uni-freiburg.de/) | [**Video**](https://youtu.be/L1MwAenzd6g)
+[**arXiv**](https://arxiv.org/abs/2404.17298) | [**Website**](http://calibration.cs.uni-freiburg.de/) | [**Video**](https://youtu.be/L1MwAenzd6g)
 
 This repository is the official implementation of the paper:
 
@@ -8,7 +8,7 @@ This repository is the official implementation of the paper:
 > [Kürsat Petek](http://www2.informatik.uni-freiburg.de/~petek/)&ast;, [Niclas Vödisch](https://vniclas.github.io/)&ast;, [Johannes Meyer](http://www2.informatik.uni-freiburg.de/~meyerjo/), [Daniele Cattaneo](https://rl.uni-freiburg.de/people/cattaneo), [Abhinav Valada](https://rl.uni-freiburg.de/people/valada), and [Wolfram Burgard](https://www.utn.de/person/wolfram-burgard/). <br>
 > &ast;Equal contribution. <br> 
 > 
-> *arXiv preprint*, 2024
+> *arXiv preprint arXiv:2404.17298*, 2024
 
 <p align="center">
   <img src="./assets/mdpcalib_overview.png" alt="Overview of MDPCalib approach" width="800" />
@@ -19,7 +19,7 @@ If you find our work useful, please consider citing our paper:
 @article{petek2024mdpcalib,
   title={Automatic Target-Less Camera-LiDAR Calibration from Motion and Deep Point Correspondences},
   author={Petek, Kürsat and Vödisch, Niclas and Meyer, Johannes and Cattaneo, Daniele and Valada, Abhinav and Burgard, Wolfram},
-  journal={arXiv preprint},
+  journal={arXiv preprint arXiv:2404.17298},
   year={2024}
 }
 ```
