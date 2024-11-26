@@ -1,5 +1,5 @@
 # MDPCalib
-[**arXiv**](https://arxiv.org/abs/2404.17298) | [**Website**](http://calibration.cs.uni-freiburg.de/) | [**Video**](https://youtu.be/L1MwAenzd6g)
+[**arXiv**](https://arxiv.org/abs/2404.17298) | [**IEEE Xplore**](https://ieeexplore.ieee.org/document/10694691) | [**Website**](http://calibration.cs.uni-freiburg.de/) | [**Video**](https://youtu.be/L1MwAenzd6g)
 
 This repository is the official implementation of the paper:
 
@@ -8,7 +8,7 @@ This repository is the official implementation of the paper:
 > [Kürsat Petek](http://www2.informatik.uni-freiburg.de/~petek/)&ast;, [Niclas Vödisch](https://vniclas.github.io/)&ast;, [Johannes Meyer](http://www2.informatik.uni-freiburg.de/~meyerjo/), [Daniele Cattaneo](https://rl.uni-freiburg.de/people/cattaneo), [Abhinav Valada](https://rl.uni-freiburg.de/people/valada), and [Wolfram Burgard](https://www.utn.de/person/wolfram-burgard/). <br>
 > &ast;Equal contribution. <br> 
 > 
-> *arXiv preprint arXiv:2404.17298*, 2024
+> *IEEE Robotics and Automation Letters*, vol. 9, issue 11, pp. 9978-9985, November 2024
 
 <p align="center">
   <img src="./assets/mdpcalib_overview.png" alt="Overview of MDPCalib approach" width="800" />
@@ -17,10 +17,13 @@ This repository is the official implementation of the paper:
 If you find our work useful, please consider citing our paper:
 ```
 @article{petek2024mdpcalib,
-  title={Automatic Target-Less Camera-LiDAR Calibration from Motion and Deep Point Correspondences},
   author={Petek, Kürsat and Vödisch, Niclas and Meyer, Johannes and Cattaneo, Daniele and Valada, Abhinav and Burgard, Wolfram},
-  journal={arXiv preprint arXiv:2404.17298},
-  year={2024}
+  journal={IEEE Robotics and Automation Letters}, 
+  title={Automatic Target-Less Camera-LiDAR Calibration From Motion and Deep Point Correspondences}, 
+  year={2024},
+  volume={9},
+  number={11},
+  pages={9978-9985}
 }
 ```
 
@@ -32,7 +35,7 @@ Sensor setups of robotic platforms commonly include both camera and LiDAR as the
 
 ## 👩‍💻 Code
 
-We will release the code upon the acceptance of our paper.
+For licensing reasons, we will release the code upon acceptance of the used point correspondence network [CMRNext](http://cmrnext.cs.uni-freiburg.de/).
 
 
 ## 👩‍⚖️  License
