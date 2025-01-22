@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+    <include file="$(find lidar_imu_init)/launch/velodyne_fast_lo_no_rviz.launch"/>
+    <include file="$(find orb_slam3_ros_wrapper)/launch/mono_kitti_front_left_right_without_play_and_rviz.launch"/>
+
+    <node pkg="pose_synchronizer" name="pose_synchronizer" type="pose_synchronizer" output="screen" required="true">
+        <!-- <remap from="/camera_undistorted/image" to="/camera/image_raw"/> -->
+        <param name="disable_pose_synchronizer" value = "true"/>
+    </node>
+
+</launch>

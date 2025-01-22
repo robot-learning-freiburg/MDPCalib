@@ -1,0 +1,69 @@
+minimum_pre_commit_version: 2.9.3
+default_language_version:
+  # force all unspecified python hooks to run python3
+  python: python3
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: check-added-large-files
+        name: Check large files (>500kB)
+        args: ["--maxkb=500"]
+      - id: check-symlinks
+        name: Check for symlinks
+      - id: trailing-whitespace
+        name: Trim trailing whitespaces
+      - id: end-of-file-fixer
+        name: Add empty line to end of file
+      - id: check-merge-conflict
+        name: Check unresolved merge conflicts
+      - id: check-json
+        name: Check JSON
+      - id: check-yaml
+        name: Check YAML
+        exclude: src\/orb_slam3_ros_wrapper
+      - id: check-xml
+        name: Check XML
+        exclude: src\/hdl_graph_slam
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: clang-format
+        name: Run clang formatter
+        args: [-i, --style=file]
+      - id: cppcheck
+        name: Run cppcheck analysis
+        args:
+          [
+            --enable=all,
+            --suppress=missingInclude,
+            --quiet,
+            --language=c++,
+            --force,
+            --inline-suppr,
+          ]
+        exclude: (src\/hdl_graph_slam|src\/orb_slam3_ros_wrapper|pythoncuda|src\/FAST_LO)
+      - id: cpplint
+        name: Run cpplint analysis
+        exclude: (src\/hdl_graph_slam|src\/orb_slam3_ros_wrapper|pythoncuda|src\/CMRNet\/visibility_pkg|src\/FAST_LO)
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.5
+    hooks:
+      - id: isort
+        name: Reorder python imports
+  - repo: local
+    hooks:
+      - id: yapf
+        name: Run yapf formatter
+        entry: yapf
+        language: system
+        types: [python]
+        args: [--in-place, --verbose]
+  - repo: local
+    hooks:
+      - id: pylint
+        name: Run pylint analysis
+        entry: pylint
+        language: system
+        types: [python]
+        exclude: (src\/hdl_graph_slam|src\/CMRNet\/src\/cmrnet\/model|src\/FAST_LO)

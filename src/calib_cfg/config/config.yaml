@@ -1,0 +1,15 @@
+# This configuration file contains global settings that might be used by multiple nodes
+
+optimization:
+  number_poses: 1000 # Optimize using N poses
+  starting_pose: 10 # Skip the first N received poses
+  number_image_pcl_pairs: 100 # Refine using correspondences from N pairs
+
+cmrnet:
+  amount_correspondences: 5 # Percentage of correspondences per pair. Value in [0, 100].
+  rotation_threshold: 50 # [Deg] Img-Pcl pairs with an estimated yaw (using LiDAR odometry) above this threshold are not processed.
+
+io:
+  cache_folder: "/data/cache"
+  path_base: "/data"
+  run_name: "debug_v01" # Name of the run. Used to create a folder in PATH_BASE/experiments.

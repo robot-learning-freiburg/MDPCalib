@@ -1,0 +1,29 @@
+services:
+  mdpcalib:
+    build:
+      context: .
+    volumes:
+      # mount this code
+      - ./src:/root/catkin_ws/src/mdpcalib
+
+      # your data volume goes here
+
+
+      # required x-forwarding
+      - /tmp/.X11-unix:/tmp/.X11-unix
+
+    environment:
+      - DISPLAY
+      - XAUTHORITY
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+
+    network_mode: host
+
+    tty: true
+    stdin_open: true

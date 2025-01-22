@@ -1,0 +1,4 @@
+pre-commit>=2.20.0
+yapf>=0.32.0
+pylint>=2.15.7
+virtualenv

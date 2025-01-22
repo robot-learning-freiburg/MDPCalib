@@ -1,0 +1,8 @@
+# Ceres solver options
+update_state_every_iteration: true
+minimizer_progress_to_stdout: true
+max_num_iterations: 1000
+function_tol: 1e-20
+parameter_tol: 1e-20
+gradient_tol: 1e-20
+linear_solver_type: "DENSE_QR" # "SPARSE_NORMAL_CHOLESKY"

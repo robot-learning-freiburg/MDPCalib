@@ -1,0 +1,4 @@
+docker-compose.yaml
+.dockerignore
+.idea/
+README.md
