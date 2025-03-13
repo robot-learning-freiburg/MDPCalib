@@ -71,15 +71,23 @@ In the public release of our MDPCalib, we provide instructions for running camer
 #### Generating a KITTI rosbag 🐈
 
 - Install the provided `kitti2bag` package from within the package directory: `pip install -e .`
-- Download the raw "synced+rectified" and "calibration" data for an odometry sequence. The mapping is available [here](https://github.com/tomas789/kitti2bag/issues/10#issuecomment-352962278).
+- Download the raw "synced+rectified" and "calibration" data for an odometry sequence. The mapping is available [here](https://github.com/tomas789/kitti2bag/issues/10#issuecomment-352962278). In the following, we will assume that the files will be downloaded to `/data/kitti/`.
 - E.g., for sequence 00, download the residential data `2011_10_03_drive_0027`:
     - https://s3.eu-central-1.amazonaws.com/avg-kitti/raw_data/2011_10_03_drive_0027/2011_10_03_drive_0027_sync.zip
     - https://s3.eu-central-1.amazonaws.com/avg-kitti/raw_data/2011_10_03_calib.zip
-- Unzip the files.
+- Unzip both files.
+    - `unzip 2011_10_03_calib.zip`
+    - `unzip 2011_10_03_drive_0027/2011_10_03_drive_0027_sync.zip`
+- Now, we replace the raw velodyne data with the point clouds from the odometry benchmark as these have been motion compensated. Download the "velodyne laser data":
+    - https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_velodyne.zip
+- It is sufficient to unzip the same sequence as downloaded above, e.g.,
+    - `rm -rf 2011_10_03/2011_10_03_drive_0027_sync/velodyne_points/data`
+    - `unzip -j -d 2011_10_03/2011_10_03_drive_0027_sync/velodyne_points/data data_odometry_velodyne.zip 'dataset/sequences/00/velodyne/*.bin'`
 - Then run: `kitti2bag -t 2011_10_03 -r 0027 raw_synced`.
 - This will result in a rosbag: `kitti_2011_10_03_drive_0027_synced.bag`.
-- For the following instructions, we will assume that the rosbag is located at `/data/kitti/raw/`.
+- For the following instructions, we will assume that the rosbag is located at `/data/kitti/`.
     - The folder can be changed in the launchers [play_bag_kitti_left.launch](src/pose_synchronizer/launch/play_bag_kitti_left.launch) and [play_bag_kitti_right.launch](src/pose_synchronizer/launch/play_bag_kitti_right.launch).
+
 
 ### 🏃 Running the calibration
 

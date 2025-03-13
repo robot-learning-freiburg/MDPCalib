@@ -4,7 +4,7 @@
 
   <param name="/use_sim_time" value="true" />
   <arg name="rosbag" default="kitti_2011_10_03_drive_0027_synced.bag" />
-  <arg name="path" default="/data/kitti/raw/" />
+  <arg name="path" default="/data/kitti/" />
   <arg name="rate" default=".25" />
   <node pkg="rosbag" type="play" name="player" output="screen"
     args="--clock $(arg path)$(arg rosbag) -r $(arg rate)
@@ -14,25 +14,5 @@
   <arg name="topic_name" default="/gt_extrinsics" />
   <node pkg="rostopic" type="rostopic" name="rostopic_pub_node" output="screen" args="pub $(arg topic_name) --once geometry_msgs/PoseStamped '{header:{stamp: now, frame_id: ''}, pose: {position: {x: -0.48119, y: -0.05404, z: -0.29220}, orientation: {x: 0.4998902, y: -0.5036978, z: 0.4960577, w: 0.5003249}}}'"
   />
-
-  <!-- <arg name="scale" default="1.0" /> -->
-  <!-- <arg name="calib_path" default="/data/camchain-rootdatadecompressed_2022-03-16-12-02-35.active.yaml"/> -->
-
-<!-- <node name="republish_play" type="republish" pkg="image_transport" output="screen" args="compressed in:=$(arg input_camera_name) raw out:=$(arg input_camera_name)/raw" /> -->
-  <!-- <node pkg="image_transport" type="republish" name="republish" output="screen" args="compressed in:=/$(arg input_camera_name) raw out:=/$(arg input_camera_name)/decompressed"/> -->
-
-  <!-- <node name="image_undistort_node" pkg="image_undistort" type="image_undistort_node">
-    <param name="input_camera_namespace" value="cam0"/>
-    <param name="input_camera_info_from_ros_params" value = "true"/>
-    <param name="scale" value="$(arg scale)"/>
-    <param name="output_camera_info_source" value="ros_params"/>
-    <param name="output_camera_namespace" value="cam0"/>
-    <rosparam file="$(arg calib_path)"/>
-    <remap from="input/image" to="$(arg input_camera_name)/decompressed"/>
-    <remap from="output/image" to="$(arg input_camera_name)/undistorted"/>
-    <param name="process_image" value="true" />
-    <param name="undistort_image" value="true" />
-    <param name="output_image_type" value="rgb8" />
-  </node> -->
 
 </launch>

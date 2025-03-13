@@ -424,6 +424,10 @@ void Optimizer::ComputeRefinedTransform() {
         ros::shutdown();
     }
 
+    // Reset before refined optimization
+    delete ceres_problem_ptr_;
+    ceres_problem_ptr_ = new ceres::Problem();
+
     auto& refined_transform = extrinsics_;
     // Allocate space for the optimization parameters
     std::vector<std::shared_ptr<TranslationConstraint>> translation_constraints;
@@ -539,7 +543,6 @@ void Optimizer::ComputeRefinedTransform() {
 
     // Obtain the refined transform
     optimizeProblem();
-
     static auto end_refine_timer = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double, std::ratio<1>> duration_refine = end_refine_timer - start_refine_timer;
     std::stringstream refine_duration_stream;
@@ -659,8 +662,8 @@ void Optimizer::AddImgPointConstraint(const ImgPointConstraint& img_point_constr
     PosePQ& posePQ = *img_point_constraint.ptr_to_pose_;
 
     // Add the cost function to the problem with the corresponding pose (position and quaternion) to be optimized
-    this->ceres_problem_ptr_->AddResidualBlock(img_point_constraint_cost_function, lf, posePQ.p.data(),
-                                               posePQ.q.coeffs().data());
+    ceres_problem_ptr_->AddResidualBlock(img_point_constraint_cost_function, lf, posePQ.p.data(),
+                                         posePQ.q.coeffs().data());
 
     // Do a local parameterization, since a quaternion is a three dimensional manifold, embedded in a four dimensional
     // space By doing this, ceres considers this, hence only 3 parameters are optimized

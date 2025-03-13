@@ -5,4 +5,5 @@ max_num_iterations: 1000
 function_tol: 1e-20
 parameter_tol: 1e-20
 gradient_tol: 1e-20
-linear_solver_type: "DENSE_QR" # "SPARSE_NORMAL_CHOLESKY"
+linear_solver_type: "DENSE_SCHUR"
+# In the paper, we used: "DENSE_QR"

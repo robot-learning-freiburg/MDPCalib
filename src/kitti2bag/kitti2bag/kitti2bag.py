@@ -403,6 +403,8 @@ def run_kitti2bag():
             save_gps_fix_data(bag, kitti, imu_frame_id, gps_fix_topic)
             save_gps_vel_data(bag, kitti, imu_frame_id, gps_vel_topic)
             for camera in cameras:
+                if 'gray' in camera[1]:
+                    continue
                 save_camera_data(bag,
                                  args.kitti_type,
                                  kitti,

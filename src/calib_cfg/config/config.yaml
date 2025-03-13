@@ -2,7 +2,7 @@
 
 optimization:
   number_poses: 1000 # Optimize using N poses
-  starting_pose: 10 # Skip the first N received poses
+  starting_pose: 15 # Skip the first N received poses
   number_image_pcl_pairs: 100 # Refine using correspondences from N pairs
 
 cmrnet:

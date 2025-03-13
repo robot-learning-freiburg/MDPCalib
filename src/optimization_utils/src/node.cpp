@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
     ros::Subscriber camera_info_subscriber =
         nh.subscribe("/camera_undistorted/camera_info", 10, &Optimizer::CameraInfoCallback, &optimizer);
     // Subscribe to visualized reprojections using the extrinsics from the initialization step
-    ros::Subscriber visu_init_subscriber =
-        nh.subscribe("cmrnet/visualization_init", 10, &Optimizer::StoreInitVisuCallback, &optimizer);
+    // ros::Subscriber visu_init_subscriber =
+    //     nh.subscribe("cmrnet/visualization_init", 10, &Optimizer::StoreInitVisuCallback, &optimizer);
     // Pass the subscriber objects to the optimizer instance
     optimizer.SetSubscriber(&synced_poses_filename_subscriber, &gt_extrinsics_subscriber, &correspondences_subscriber,
                             &camera_info_subscriber, nullptr);
