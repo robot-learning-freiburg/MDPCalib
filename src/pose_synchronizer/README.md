@@ -13,7 +13,7 @@ Since the LiDAR and camera are not supposed to by triggered at the exact same ti
 
 - Start roscore: `roscore`
 - Visualize in rviz: `roscd pose_synchronizer`; `rviz -d rviz/combined.rviz`
-- Run CMRNet: `rosrun cmrnet cmrnetpp_ros_node.py`
+- Run CMRNext: `rosrun cmrnext cmrnext_ros_node.py`
 - Run optimizer: `rosrun optimization_utils optimization_utils`
 - Run synchronizer: `roslaunch pose_synchronizer pose_synchronizer.launch`
 - _Wait until the vocabulary has been loaded_

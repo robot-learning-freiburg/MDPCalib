@@ -122,7 +122,7 @@ RUN git clone https://github.com/SMRT-AIST/fast_gicp.git --recursive
 # Image Undistort
 RUN git clone https://github.com/ethz-asl/image_undistort.git
 
-# Additional dependencies for CMRNet
+# Additional dependencies for CMRNext
 RUN pip3 install numpy==1.20.3 scikit-image pyquaternion mathutils==2.81.2 tqdm python-dateutil==2.8.2 open3d pillow==10.3.0
 
 # Create catkin workspace and copy calibration codes
@@ -130,11 +130,11 @@ WORKDIR /root/catkin_ws
 RUN mkdir -p /root/catkin_ws/src
 COPY ./src /root/catkin_ws/src/mdpcalib
 
-# Python3 setup for CMRNet
-# WORKDIR /root/catkin_ws/src/mdpcalib/CMRNet
+# Python3 setup for CMRNext
+WORKDIR /root/catkin_ws/src/mdpcalib/CMRNext
 # RUN pip3 install -r requirements.txt
-# WORKDIR /root/catkin_ws/src/mdpcalib/CMRNet/visibility_pkg
-# RUN python3 setup.py install
+WORKDIR /root/catkin_ws/src/mdpcalib/CMRNext/visibility_pkg
+RUN python3 setup.py install
 
 # Build catkin workspace
 WORKDIR /root/catkin_ws

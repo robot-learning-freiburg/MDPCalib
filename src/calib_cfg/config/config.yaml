@@ -5,7 +5,7 @@ optimization:
   starting_pose: 15 # Skip the first N received poses
   number_image_pcl_pairs: 100 # Refine using correspondences from N pairs
 
-cmrnet:
+cmrnext:
   amount_correspondences: 5 # Percentage of correspondences per pair. Value in [0, 100].
   rotation_threshold: 50 # [Deg] Img-Pcl pairs with an estimated yaw (using LiDAR odometry) above this threshold are not processed.
 

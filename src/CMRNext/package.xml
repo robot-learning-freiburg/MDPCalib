@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+
+    <name>cmrnext</name>
+    <version>1.0.0</version>
+    <description>ROS integration for CMRNext</description>
+    <maintainer email="cattaneo@cs.uni-freiburg.de">Daniele Cattaneo</maintainer>
+    <license>GPL-3.0</license>
+    <author email="cattaneo@cs.uni-freiburg.de">Daniele Cattaneo</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <exec_depend>calib_msgs</exec_depend>
+    <exec_depend>std_msgs</exec_depend>
+    <exec_depend>geometry_msgs</exec_depend>
+    <exec_depend>rosbag</exec_depend>
+
+    <export>
+    </export>
+
+</package>

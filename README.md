@@ -35,13 +35,11 @@ Sensor setups of robotic platforms commonly include both camera and LiDAR as the
 
 ## 👩‍💻 Code
 
-> &#x26a0;&#xfe0f; **Note:** As of now, we have only released the coarse calibration. We will upload the refinement step upon the official public release of [CMRNext](https://cmrnext.cs.uni-freiburg.de/).
-
 ### 💻 Development
 
 #### Docker 🐋
 
-Tested with `Docker version 27.2.1` and `Docker Compose version v2.29.2`.
+Tested with `Docker version 28.0.1` and `Docker Compose version v2.33.1`.
 
 - To build the image, run `docker compose build` in the root of this repository.
 - Prepare using GUIs in the container: `xhost +local:docker`.
@@ -55,7 +53,7 @@ We used multiple githooks during the development of this code. You can set up th
 
 1. Create a venv or conda environment. Make sure to source that before committing.
 2. Install requirements: `pip install -r requirements.txt`
-3. [**Not yet released**] Install CMRNet requirements for pylint to work: `pip install -r src/CMRNet/rquirements.txt`
+3. Install CMRNext requirements for pylint to work: `pip install -r src/CMRNext/rquirements.txt`
 4. Install [pre-commit](https://pre-commit.com/) githook scripts: `pre-commit install`
 
 Python formatter ([yapf](https://github.com/google/yapf), [iSort](https://github.com/PyCQA/isort)) settings can be set in [pyproject.toml](pyproject.toml). C++ formatter ([ClangFormat](https://clang.llvm.org/docs/ClangFormat.html)) settings are in [.clang-format](.clang-format).
@@ -69,6 +67,8 @@ To run the githooks on all files independent of doing a commit, use `pre-commit 
 In the public release of our MDPCalib, we provide instructions for running camera-LiDAR calibration on the KITTI dataset.
 
 #### Generating a KITTI rosbag 🐈
+
+> &#x26a0;&#xfe0f; **Note:** If you created the rosbag before commit [19645fb](https://github.com/robot-learning-freiburg/MDPCalib/tree/19645fb5b224d45b6a56c6daa94ed873e911f10c) (Mar 13, 2025), please re-create it following the updated instructions.
 
 - Install the provided `kitti2bag` package from within the package directory: `pip install -e .`
 - Download the raw "synced+rectified" and "calibration" data for an odometry sequence. The mapping is available [here](https://github.com/tomas789/kitti2bag/issues/10#issuecomment-352962278). In the following, we will assume that the files will be downloaded to `/data/kitti/`.
@@ -88,17 +88,22 @@ In the public release of our MDPCalib, we provide instructions for running camer
 - For the following instructions, we will assume that the rosbag is located at `/data/kitti/`.
     - The folder can be changed in the launchers [play_bag_kitti_left.launch](src/pose_synchronizer/launch/play_bag_kitti_left.launch) and [play_bag_kitti_right.launch](src/pose_synchronizer/launch/play_bag_kitti_right.launch).
 
+#### Downloading model weights 🏋️
+
+Please download the model weights of CMRNext from this link and store them under: `/data/cmrnext`.
+- Model weights: https://calibration.cs.uni-freiburg.de/downloads/cmrnext_weights.zip
 
 ### 🏃 Running the calibration
 
 For changing the configuration settings, please consult the [config file](src/calib_cfg/config/config.yaml).
 Note that there we also specify the name of the experiment that creates an output folder under `/root/catkin_ws/src/mdpcalib/experiments`.
+To prevent overwriting previous results, names of experiments must be unique.
 
 Please execute the following steps in separate terminals:
 
 1. Start a roscore: `roscore`
 2. [Optional] Start rviz: `roscd pose_synchronizer; rviz -d rviz/combined.rviz`
-3. [**Not yet released**] Launch CMRNext: `roslaunch cmrnet cmrnet_kitti.launch`
+3. Launch CMRNext: `roslaunch cmrnext cmrnext_kitti.launch`
 4. Launch the optimizer: `roslaunch optimization_utils optimizer.launch`
 5. Launch the data synchronizer: `roslaunch pose_synchronizer pose_synchronizer_fastlo_kitti.launch`
 6. Wait until the ORB vocabulary has been loaded.
@@ -116,7 +121,7 @@ For any commercial purpose, please contact the authors.
 ## 🙏 Acknowledgment
 
 In our work and experiments, we have used components from many other works. We thank the authors for open-sourcing their code. In no specific order, we list source repositories:
-- CMRNext: https://github.com/robot-learning-freiburg/CMRNext (not released)
+- CMRNext: https://github.com/robot-learning-freiburg/CMRNext
 - ORB SLAM3 ROS Wrapper: https://github.com/thien94/orb_slam3_ros_wrapper
 - kitti2bag: https://github.com/tomas789/kitti2bag
 - FAST-LO: https://github.com/hku-mars/LiDAR_IMU_Init

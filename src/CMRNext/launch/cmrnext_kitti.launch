@@ -1,0 +1,3 @@
+<launch>
+    <node name="cmrnext" pkg="cmrnext" type="cmrnext_ros_node.py" args="--image_shape 376 1241 --weights /data/cmrnext/cmrnext-calib-LEnc-iter1.tar /data/cmrnext/cmrnext-calib-LEnc-iter5.tar /data/cmrnext/cmrnext-calib-LEnc-iter6.tar" output="screen"/>
+</launch>

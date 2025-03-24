@@ -150,7 +150,7 @@ void Optimizer::CachePosesCallback(const calib_msgs::StringStampedConstPtr& pose
     synced_poses_filenames_.push_back(std::make_pair(poses_msg->data, poses_msg->header.seq));
 
     if (synced_poses_filenames_.size() == 1) {
-        // Send a first meta message to the CMRNet node to avoid caching unused data
+        // Send a first meta message to the CMRNext node to avoid caching unused data
         calib_msgs::UInt16MultiArrayStamped initial_transform_meta_msg;
         initial_transform_meta_msg.data.layout.dim.push_back(std_msgs::MultiArrayDimension());
         initial_transform_meta_msg.data.layout.dim[0].size = 1;
@@ -181,7 +181,7 @@ void Optimizer::CachePosesCallback(const calib_msgs::StringStampedConstPtr& pose
 
 void Optimizer::CacheCorrespondencesCallback(
     const calib_msgs::ImagePclCorrespondencesStampedConstPtr& correspondences_msg) {
-    static auto start_cmrnet_timer = std::chrono::high_resolution_clock::now();
+    static auto start_cmrnext_timer = std::chrono::high_resolution_clock::now();
 
     ROS_INFO_STREAM("Received correspondences with seq " << correspondences_msg->header.seq);
 
@@ -205,13 +205,13 @@ void Optimizer::CacheCorrespondencesCallback(
     ROS_INFO_STREAM("Cached correspondence with seq " << correspondences_msg->header.seq);
 
     if (correspondences_.size() == number_used_pairs_) {
-        static auto end_cmrnet_timer = std::chrono::high_resolution_clock::now();
-        const std::chrono::duration<double, std::ratio<1>> duration_cmrnet = end_cmrnet_timer - start_cmrnet_timer;
-        std::stringstream cmrnet_duration_stream;
-        cmrnet_duration_stream << "Duration of rosbag processing: " << duration_cmrnet.count() << " seconds."
+        static auto end_cmrnext_timer = std::chrono::high_resolution_clock::now();
+        const std::chrono::duration<double, std::ratio<1>> duration_cmrnext = end_cmrnext_timer - start_cmrnext_timer;
+        std::stringstream cmrnext_duration_stream;
+        cmrnext_duration_stream << "Duration of rosbag processing: " << duration_cmrnext.count() << " seconds."
                                << "\n\n";
-        ROS_INFO_STREAM(cmrnet_duration_stream.str());
-        io_utils_.writeResults(cmrnet_duration_stream);
+        ROS_INFO_STREAM(cmrnext_duration_stream.str());
+        io_utils_.writeResults(cmrnext_duration_stream);
 
         if (correspondences_subscriber_ != nullptr) {
             correspondences_subscriber_->shutdown();
@@ -371,7 +371,7 @@ void Optimizer::ComputeInitialTransform() {
     // The initialization is set up such that we obtain the LiDAR pose in the camera coordinate system. We invert this
     // to obtain the camera pose in the LiDAR frame such that we can directly use it to transform the LiDAR points
     // into the camera frame for estimation of correspondences, optimization and visualization
-    // We set the translation to zero as CMRNET is robust enough to work with it
+    // We set the translation to zero as CMRNext is robust enough to work with it
 
     initial_transform->p << 0.0, 0.0, 0.0;
     //    initial_transform->p << 0, 0, 0;
@@ -409,13 +409,6 @@ void Optimizer::ComputeInitialTransform() {
     initial_transform_msg.transform.rotation.w = initial_transform->q.w();
     initial_transform_msg.header.stamp = camera_pose_msg.header.stamp;
     initial_transform_pub_.publish(initial_transform_msg);
-
-    // ToDo: Remove after adding CMRNext
-    ROS_WARN_STREAM("The refinement will be available upon the public release of CMRNext.");
-
-    // Terminate this node. The job is done.
-    ROS_INFO_STREAM("Done processing. Shutting down the optimizer node.");
-    ros::shutdown();
 }
 
 void Optimizer::ComputeRefinedTransform() {
@@ -584,8 +577,8 @@ void Optimizer::ComputeRefinedTransform() {
     eval6dRefineStream
         << "The error (after optimization with correspondences) measured as translation vector (x,y,z) and euler "
            "angles (zyx)\nTranslation: ("
-        << error6d.first.x() << ", " << error6d.first.y() << ", " << error6d.first.z() << ")\nRotation:    ("
-        << error6d.second.x() << ", " << error6d.second.y() << ", " << error6d.second.z() << ")"
+        << error6d.first.x() << ", " << error6d.first.y() << ", " << error6d.first.z() << ") meters\nRotation:    ("
+        << error6d.second.x() << ", " << error6d.second.y() << ", " << error6d.second.z() << ") radians"
         << "\n\n";
 
     ROS_INFO_STREAM(eval6dRefineStream.str());
@@ -594,7 +587,7 @@ void Optimizer::ComputeRefinedTransform() {
     evalNormRefineStream
         << "The error (after optimization with correspondences) measured as translation magnitude (delta_t) and "
            "rotation magnitude (delta_r)\nTranslation magnitude: ("
-        << errorNorm.first << ")\nRotation magnitude:    (" << errorNorm.second << ")"
+        << errorNorm.first << ") meters\nRotation magnitude:    (" << errorNorm.second << ") radians"
         << "\n\n";
     ROS_INFO_STREAM(evalNormRefineStream.str());
     io_utils_.writeResults(evalNormRefineStream);
