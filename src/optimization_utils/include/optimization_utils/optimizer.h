@@ -51,9 +51,10 @@ class Optimizer : public CeresBase {
     void ComputeRefinedTransform();
 
    private:
-    void AddRotationConstraint(const RotationConstraint& rotation_constraint, ceres::LossFunction* lf = nullptr);
+    void AddRotationConstraint(const RotationConstraint& rotation_constraint, ceres::LossFunction* lf = nullptr,
+                               bool invert = false);
     void AddTranslationConstraint(const TranslationConstraint& translation_constraint,
-                                  ceres::LossFunction* lf = nullptr);
+                                  ceres::LossFunction* lf = nullptr, bool invert = false);
     void AddImgPointConstraint(const ImgPointConstraint& img_point_constraint, ceres::LossFunction* lf = nullptr);
 
     PosePQ InvertPose(const geometry_msgs::PoseStamped& pose_msg);
@@ -61,6 +62,7 @@ class Optimizer : public CeresBase {
     Eigen::MatrixX4d GetPoseDiff(const PosePQ& pose_gt, const PosePQ& pose_pred);
 
     // Global timer to measure start processing time
+    // cppcheck-suppress[unusedFunction]
     static std::chrono::time_point<std::chrono::high_resolution_clock> GetTimer() {
         static auto start_proc_time = std::chrono::high_resolution_clock::now();
         return start_proc_time;
@@ -74,6 +76,7 @@ class Optimizer : public CeresBase {
         return std::make_pair(posError, rotError);
     }
 
+    // cppcheck-suppress[unusedFunction]
     std::pair<double, double> EvaluateNorms(const PosePQ& pose_gt, const PosePQ& pose_pred) {
         Eigen::Matrix4d poseDiff = this->GetPoseDiff(pose_gt, pose_pred);
         double posError = Point3d(poseDiff.block<3, 1>(0, 3)).norm();

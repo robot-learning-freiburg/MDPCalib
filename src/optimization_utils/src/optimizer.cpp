@@ -118,7 +118,7 @@ void Optimizer::CachePosesCallback(const calib_msgs::StringStampedConstPtr& pose
         topics.push_back(std::string("camera_pose"));
         rosbag::View view(bag, rosbag::TopicQuery(topics));
         geometry_msgs::PoseStampedConstPtr camera_pose_msg, lidar_pose_msg;
-        BOOST_FOREACH (rosbag::MessageInstance const m, view) {
+        BOOST_FOREACH (rosbag::MessageInstance const m, view) {  // NOLINT
             camera_pose_msg = m.instantiate<geometry_msgs::PoseStamped>();
         }
         bag.close();
@@ -209,7 +209,7 @@ void Optimizer::CacheCorrespondencesCallback(
         const std::chrono::duration<double, std::ratio<1>> duration_cmrnext = end_cmrnext_timer - start_cmrnext_timer;
         std::stringstream cmrnext_duration_stream;
         cmrnext_duration_stream << "Duration of rosbag processing: " << duration_cmrnext.count() << " seconds."
-                               << "\n\n";
+                                << "\n\n";
         ROS_INFO_STREAM(cmrnext_duration_stream.str());
         io_utils_.writeResults(cmrnext_duration_stream);
 
@@ -279,7 +279,7 @@ void Optimizer::ComputeInitialTransform() {
         topics.push_back(std::string("camera_pose"));
         topics.push_back(std::string("lidar_pose"));
         rosbag::View view(bag, rosbag::TopicQuery(topics));
-        BOOST_FOREACH (rosbag::MessageInstance const m, view) {
+        BOOST_FOREACH (rosbag::MessageInstance const m, view) {  // NOLINT
             if (m.getTopic() == std::string("camera_pose")) {
                 prev_camera_pose_msg = *m.instantiate<geometry_msgs::PoseStamped>();
             } else {
@@ -300,7 +300,7 @@ void Optimizer::ComputeInitialTransform() {
         topics.push_back(std::string("camera_pose"));
         topics.push_back(std::string("lidar_pose"));
         rosbag::View view(bag, rosbag::TopicQuery(topics));
-        BOOST_FOREACH (rosbag::MessageInstance const m, view) {
+        BOOST_FOREACH (rosbag::MessageInstance const m, view) {  // NOLINT
             if (m.getTopic() == std::string("camera_pose")) {
                 camera_pose_msg = *m.instantiate<geometry_msgs::PoseStamped>();
             } else {
@@ -373,6 +373,7 @@ void Optimizer::ComputeInitialTransform() {
     // into the camera frame for estimation of correspondences, optimization and visualization
     // We set the translation to zero as CMRNext is robust enough to work with it
 
+    // cppcheck-suppress[constStatement]
     initial_transform->p << 0.0, 0.0, 0.0;
     //    initial_transform->p << 0, 0, 0;
 
@@ -441,7 +442,7 @@ void Optimizer::ComputeRefinedTransform() {
         topics.push_back(std::string("camera_pose"));
         topics.push_back(std::string("lidar_pose"));
         rosbag::View view(bag, rosbag::TopicQuery(topics));
-        BOOST_FOREACH (rosbag::MessageInstance const m, view) {
+        BOOST_FOREACH (rosbag::MessageInstance const m, view) {  // NOLINT
             if (m.getTopic() == std::string("camera_pose")) {
                 prev_camera_pose_msg = *m.instantiate<geometry_msgs::PoseStamped>();
             } else {
@@ -463,7 +464,7 @@ void Optimizer::ComputeRefinedTransform() {
         topics.push_back(std::string("camera_pose"));
         topics.push_back(std::string("lidar_pose"));
         rosbag::View view(bag, rosbag::TopicQuery(topics));
-        BOOST_FOREACH (rosbag::MessageInstance const m, view) {
+        BOOST_FOREACH (rosbag::MessageInstance const m, view) {  // NOLINT
             if (m.getTopic() == std::string("camera_pose")) {
                 camera_pose_msg = *m.instantiate<geometry_msgs::PoseStamped>();
             } else {
@@ -472,10 +473,10 @@ void Optimizer::ComputeRefinedTransform() {
         }
         bag.close();
 
-        PosePQ camera_pose = this->InvertPose(camera_pose_msg);
-        PosePQ lidar_pose = this->InvertPose(lidar_pose_msg);
-        PosePQ prev_camera_pose = this->InvertPose(prev_camera_pose_msg);
-        PosePQ prev_lidar_pose = this->InvertPose(prev_lidar_pose_msg);
+        PosePQ camera_pose(camera_pose_msg.pose);
+        PosePQ lidar_pose(lidar_pose_msg.pose);
+        PosePQ prev_camera_pose(prev_camera_pose_msg.pose);
+        PosePQ prev_lidar_pose(prev_lidar_pose_msg.pose);
 
         // If ORB-SLAM3 lost track (created new map), it resets the poses to the origin. To avoid computing a pose
         // difference between poses of different maps, we skip the poses if the current or previous one points to
@@ -501,8 +502,10 @@ void Optimizer::ComputeRefinedTransform() {
             std::make_shared<TranslationConstraint>(odometry_map, refined_transform, scales_[scales_iter++]));
 
         // Set up the optimization problem
-        AddRotationConstraint(*rotation_constraints.back(), new ceres::CauchyLoss(0.000001));
-        AddTranslationConstraint(*translation_constraints.back(), new ceres::CauchyLoss(0.000001));
+        AddRotationConstraint(*rotation_constraints.back(), new ceres::CauchyLoss(0.000001),
+                              true);  // Use inverse cost function
+        AddTranslationConstraint(*translation_constraints.back(), new ceres::CauchyLoss(0.000001),
+                                 true);  // Use inverse cost function
 
         // Set the current poses to the previous ones
         prev_camera_pose_msg = camera_pose_msg;
@@ -580,14 +583,14 @@ void Optimizer::ComputeRefinedTransform() {
         << error6d.first.x() << ", " << error6d.first.y() << ", " << error6d.first.z() << ") meters\nRotation:    ("
         << error6d.second.x() << ", " << error6d.second.y() << ", " << error6d.second.z() << ") radians"
         << "\n\n";
-
     ROS_INFO_STREAM(eval6dRefineStream.str());
     io_utils_.writeResults(eval6dRefineStream);
 
     evalNormRefineStream
         << "The error (after optimization with correspondences) measured as translation magnitude (delta_t) and "
            "rotation magnitude (delta_r)\nTranslation magnitude: ("
-        << errorNorm.first << ") meters\nRotation magnitude:    (" << errorNorm.second << ") radians"
+        << errorNorm.first << ") meters\nRotation magnitude:    (" << errorNorm.second
+        << ") radians\n                       (" << errorNorm.second * 180.0 / M_PI << ") degrees"
         << "\n\n";
     ROS_INFO_STREAM(evalNormRefineStream.str());
     io_utils_.writeResults(evalNormRefineStream);
@@ -609,10 +612,20 @@ void Optimizer::ComputeRefinedTransform() {
     ros::shutdown();
 }
 
-void Optimizer::AddRotationConstraint(const RotationConstraint& rotation_constraint, ceres::LossFunction* lf) {
-    ceres::CostFunction* initRotCostFunction = CostFunctorInitNonLin::Create(
-        Eigen::Matrix<double, 3, 3>::Identity(), rotation_constraint.measurement_ptr_->find("camera")->second.quantity_,
-        rotation_constraint.measurement_ptr_->find("lidar")->second.quantity_);
+void Optimizer::AddRotationConstraint(const RotationConstraint& rotation_constraint, ceres::LossFunction* lf,
+                                      bool invert) {
+    ceres::CostFunction* initRotCostFunction = nullptr;
+    if (!invert) {
+        initRotCostFunction =
+            CostFunctorInitNonLin::Create(Eigen::Matrix<double, 3, 3>::Identity(),
+                                          rotation_constraint.measurement_ptr_->find("camera")->second.quantity_,
+                                          rotation_constraint.measurement_ptr_->find("lidar")->second.quantity_);
+    } else {
+        initRotCostFunction =
+            CostFunctorInitNonLinInv::Create(Eigen::Matrix<double, 3, 3>::Identity(),
+                                             rotation_constraint.measurement_ptr_->find("camera")->second.quantity_,
+                                             rotation_constraint.measurement_ptr_->find("lidar")->second.quantity_);
+    }
 
     ceres_problem_ptr_->AddResidualBlock(initRotCostFunction, lf,
                                          rotation_constraint.ptr_to_extrinsics_->q.coeffs().data());
@@ -621,11 +634,20 @@ void Optimizer::AddRotationConstraint(const RotationConstraint& rotation_constra
                                             new ceres::EigenQuaternionParameterization);
 }
 
-void Optimizer::AddTranslationConstraint(const TranslationConstraint& translation_constraint, ceres::LossFunction* lf) {
-    ceres::CostFunction* initTransCostFunction =
-        CostFunctorInitLin::Create(Eigen::Matrix<double, 3, 3>::Identity(),
-                                   translation_constraint.measurement_ptr_->find("camera")->second.quantity_,
-                                   translation_constraint.measurement_ptr_->find("lidar")->second.quantity_);
+void Optimizer::AddTranslationConstraint(const TranslationConstraint& translation_constraint, ceres::LossFunction* lf,
+                                         bool invert) {
+    ceres::CostFunction* initTransCostFunction = nullptr;
+    if (!invert) {
+        initTransCostFunction =
+            CostFunctorInitLin::Create(Eigen::Matrix<double, 3, 3>::Identity(),
+                                       translation_constraint.measurement_ptr_->find("camera")->second.quantity_,
+                                       translation_constraint.measurement_ptr_->find("lidar")->second.quantity_);
+    } else {
+        initTransCostFunction =
+            CostFunctorInitLinInv::Create(Eigen::Matrix<double, 3, 3>::Identity(),
+                                          translation_constraint.measurement_ptr_->find("camera")->second.quantity_,
+                                          translation_constraint.measurement_ptr_->find("lidar")->second.quantity_);
+    }
 
     // Add residual to the ceres problem
     ceres_problem_ptr_->AddResidualBlock(initTransCostFunction, lf, translation_constraint.ptr_to_extrinsics_->p.data(),

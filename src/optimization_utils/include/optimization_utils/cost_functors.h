@@ -46,20 +46,18 @@ struct CostFunctorWeighted3d {
 };
 
 struct CostFunctorInitLin : public CostFunctorWeighted3d {
-    CostFunctorInitLin(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a,
-                       const PosePQ& lidar_b_T_lidar_a)
-        : CostFunctorWeighted3d(weights),
-          cam_b_T_cam_a_(cam_b_T_cam_a),
-          lidar_b_T_lidar_a_(lidar_b_T_lidar_a) {}
+    CostFunctorInitLin(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a, const PosePQ& lidar_b_T_lidar_a)
+        : CostFunctorWeighted3d(weights), cam_b_T_cam_a_(cam_b_T_cam_a), lidar_b_T_lidar_a_(lidar_b_T_lidar_a) {}
     template <typename T>
-    bool operator()(const T* const pos_calib_ptr, const T* const quat_calib_ptr, const T* const scale_ptr, T* res) const {
+    bool operator()(const T* const pos_calib_ptr, const T* const quat_calib_ptr, const T* const scale_ptr,
+                    T* res) const {
         // Map the incoming pointers to Eigen objects
         Eigen::Map<const Eigen::Matrix<T, 3, 1>> pos_calib(pos_calib_ptr);
         Eigen::Map<const Eigen::Quaternion<T>> quat_calib(quat_calib_ptr);
 
         // Split the computation of the error term into subparts
-        Eigen::Matrix<T, 3, 1> eq_left_cam = cam_b_T_cam_a_.q.template cast<T>() * pos_calib +
-                                           scale_ptr[0] * cam_b_T_cam_a_.p.template cast<T>();
+        Eigen::Matrix<T, 3, 1> eq_left_cam =
+            cam_b_T_cam_a_.q.template cast<T>() * pos_calib + scale_ptr[0] * cam_b_T_cam_a_.p.template cast<T>();
         Eigen::Matrix<T, 3, 1> eq_right_lidar = quat_calib * lidar_b_T_lidar_a_.p.template cast<T>() + pos_calib;
         Eigen::Matrix<T, 3, 1> delta_pos = eq_left_cam - eq_right_lidar;
 
@@ -73,7 +71,7 @@ struct CostFunctorInitLin : public CostFunctorWeighted3d {
         return true;
     }
 
-    // cppcheck-suppress unusedFunction
+    // cppcheck-suppress[unusedFunction]
     static ceres::CostFunction* Create(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a,
                                        const PosePQ& lidar_b_T_lidar_a) {
         return new ceres::AutoDiffCostFunction<CostFunctorInitLin, 3, 3, 4, 1>(
@@ -86,12 +84,49 @@ struct CostFunctorInitLin : public CostFunctorWeighted3d {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
+struct CostFunctorInitLinInv : public CostFunctorWeighted3d {
+    CostFunctorInitLinInv(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a, const PosePQ& lidar_b_T_lidar_a)
+        : CostFunctorWeighted3d(weights), cam_b_T_cam_a_(cam_b_T_cam_a), lidar_b_T_lidar_a_(lidar_b_T_lidar_a) {}
+    template <typename T>
+    bool operator()(const T* const pos_calib_ptr, const T* const quat_calib_ptr, const T* const scale_ptr,
+                    T* res) const {
+        // Map the incoming pointers to Eigen objects
+        Eigen::Map<const Eigen::Matrix<T, 3, 1>> pos_calib(pos_calib_ptr);
+        Eigen::Map<const Eigen::Quaternion<T>> quat_calib(quat_calib_ptr);
+
+        // Split the computation of the error term into subparts
+        Eigen::Matrix<T, 3, 1> eq_left_lidar =
+            lidar_b_T_lidar_a_.q.template cast<T>() * pos_calib + lidar_b_T_lidar_a_.p.template cast<T>();
+
+        Eigen::Matrix<T, 3, 1> eq_right_cam =
+            quat_calib * (scale_ptr[0] * cam_b_T_cam_a_.p.template cast<T>()) + pos_calib;
+        Eigen::Matrix<T, 3, 1> delta_pos = eq_left_lidar - eq_right_cam;
+
+        // Compute the residuals
+        // [ position ] [ delta_pos ]
+        Eigen::Map<Eigen::Matrix<T, 3, 1>> residuals(res);
+        residuals.template block<3, 1>(0, 0) = T(2.0) * delta_pos;
+
+        // Scale the residuals by constraint weights
+        residuals.applyOnTheLeft((this->w_).template cast<T>());
+        return true;
+    }
+
+    static ceres::CostFunction* Create(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a,
+                                       const PosePQ& lidar_b_T_lidar_a) {
+        return new ceres::AutoDiffCostFunction<CostFunctorInitLinInv, 3, 3, 4, 1>(
+            new CostFunctorInitLinInv(weights, cam_b_T_cam_a, lidar_b_T_lidar_a));
+    }
+
+    PosePQ cam_b_T_cam_a_;
+    PosePQ lidar_b_T_lidar_a_;
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
 struct CostFunctorInitNonLin : public CostFunctorWeighted3d {
-    CostFunctorInitNonLin(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a,
-                          const PosePQ& lidar_b_T_lidar_a)
-        : CostFunctorWeighted3d(weights),
-          cam_b_T_cam_a_(cam_b_T_cam_a),
-          lidar_b_T_lidar_a_(lidar_b_T_lidar_a) {}
+    CostFunctorInitNonLin(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a, const PosePQ& lidar_b_T_lidar_a)
+        : CostFunctorWeighted3d(weights), cam_b_T_cam_a_(cam_b_T_cam_a), lidar_b_T_lidar_a_(lidar_b_T_lidar_a) {}
     template <typename T>
     bool operator()(const T* const quat_calib_ptr, T* res) const {
         // Map the incoming pointers to Eigen objects
@@ -116,6 +151,41 @@ struct CostFunctorInitNonLin : public CostFunctorWeighted3d {
                                        const PosePQ& lidar_b_T_lidar_a) {
         return new ceres::AutoDiffCostFunction<CostFunctorInitNonLin, 3, 4>(
             new CostFunctorInitNonLin(weights, cam_b_T_cam_a, lidar_b_T_lidar_a));
+    }
+
+    PosePQ cam_b_T_cam_a_;
+    PosePQ lidar_b_T_lidar_a_;
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+struct CostFunctorInitNonLinInv : public CostFunctorWeighted3d {
+    CostFunctorInitNonLinInv(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a, const PosePQ& lidar_b_T_lidar_a)
+        : CostFunctorWeighted3d(weights), cam_b_T_cam_a_(cam_b_T_cam_a), lidar_b_T_lidar_a_(lidar_b_T_lidar_a) {}
+    template <typename T>
+    bool operator()(const T* const quat_calib_ptr, T* res) const {
+        // Map the incoming pointers to Eigen objects
+        Eigen::Map<const Eigen::Quaternion<T>> quat_calib(quat_calib_ptr);
+
+        Eigen::Quaternion<T> quat_calib_cam = quat_calib * cam_b_T_cam_a_.q.template cast<T>();
+        Eigen::Quaternion<T> quat_calib_lidar = lidar_b_T_lidar_a_.q.template cast<T>() * quat_calib;
+
+        Eigen::Quaternion<T> delta_q = quat_calib_cam * quat_calib_lidar.conjugate().normalized();
+
+        // Compute the residuals
+        // [orientation (3x1) ] =  [ 2 * delta_q(0:2)]
+        Eigen::Map<Eigen::Matrix<T, 3, 1>> residuals(res);
+        residuals.template block<3, 1>(0, 0) = T(2.0) * delta_q.vec();
+
+        // Scale the residuals by constraint weights
+        residuals.applyOnTheLeft((this->w_).template cast<T>());
+        return true;
+    }
+
+    static ceres::CostFunction* Create(const Matrix3d& weights, const PosePQ& cam_b_T_cam_a,
+                                       const PosePQ& lidar_b_T_lidar_a) {
+        return new ceres::AutoDiffCostFunction<CostFunctorInitNonLinInv, 3, 4>(
+            new CostFunctorInitNonLinInv(weights, cam_b_T_cam_a, lidar_b_T_lidar_a));
     }
 
     PosePQ cam_b_T_cam_a_;
